@@ -6,6 +6,8 @@ import com.mikuac.shiro.constant.ActionParams;
 import com.mikuac.shiro.dto.action.common.*;
 import com.mikuac.shiro.dto.action.response.*;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
+import com.mikuac.shiro.dto.event.message.MessageEvent;
 import com.mikuac.shiro.enums.ActionPath;
 import com.mikuac.shiro.enums.ActionPathEnum;
 import com.mikuac.shiro.handler.ActionHandler;
@@ -17,6 +19,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -143,6 +147,98 @@ public class Bot {
         params.put(ActionParams.MESSAGE, msg);
         params.put(ActionParams.AUTO_ESCAPE, autoEscape);
         JSONObject result = actionHandler.action(session, ActionPathEnum.SEND_PRIVATE_MSG, params);
+        return result != null ? result.to(new TypeReference<ActionData<MsgId>>() {
+        }.getType()) : null;
+    }
+
+    /**
+     * 发送MarkDown私聊消息
+     * @param userId
+     * @param dataid
+     * @param autoEscape
+     * @return
+     */
+    public ActionData<MsgId> sendPrivateMarkDownMsg(long userId, String dataid, boolean autoEscape) {
+        JSONObject params = new JSONObject();
+        params.put(ActionParams.USER_ID, userId);
+
+        /**
+         * 格式
+         *{
+         *     "action": "send_private_msg",
+         *     "params": {
+         *         "user_id": 894446744,
+         *         "message": [
+         *             {
+         *                 "type": "longmsg",
+         *                 "data": {
+         *                     "id": "2xJwXa2aIZGQG3SdXbjVRp2dLZA7/HMAeRjIJK9FGBhWQVhnkwxnBkJFtfQkZWAl"
+         *                 }
+         *             }
+         *         ]
+         *     }
+         * }
+         *
+         */
+        //构建mk消息结构
+        List<HashMap<String, Object>> messageList = new ArrayList<>();
+        HashMap<String, Object> typeData = new HashMap<>();
+        typeData.put("type", "longmsg");
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("id",dataid);
+        messageList.add(data);
+        typeData.put("data", data);
+        messageList.add(typeData);
+
+        params.put(ActionParams.MESSAGE, messageList);
+        params.put(ActionParams.AUTO_ESCAPE, autoEscape);
+        JSONObject result = actionHandler.action(session, ActionPathEnum.SEND_PRIVATE_MSG, params);
+        return result != null ? result.to(new TypeReference<ActionData<MsgId>>() {
+        }.getType()) : null;
+    }
+
+    /**
+     * 发送MarkDown群聊消息
+     * @param groupId
+     * @param dataid
+     * @param autoEscape
+     * @return
+     */
+    public ActionData<MsgId> sendGroupMarkDownMsg(long groupId, String dataid, boolean autoEscape) {
+        JSONObject params = new JSONObject();
+        params.put(ActionParams.GROUP_ID, groupId);
+
+        /**
+         * 格式
+         *{
+         *     "action": "send_group_msg",
+         *     "params": {
+         *         "group_id": 894446744,
+         *         "message": [
+         *             {
+         *                 "type": "longmsg",
+         *                 "data": {
+         *                     "id": "2xJwXa2aIZGQG3SdXbjVRp2dLZA7/HMAeRjIJK9FGBhWQVhnkwxnBkJFtfQkZWAl"
+         *                 }
+         *             }
+         *         ]
+         *     }
+         * }
+         *
+         */
+        //构建mk消息结构
+        List<HashMap<String, Object>> messageList = new ArrayList<>();
+        HashMap<String, Object> typeData = new HashMap<>();
+        typeData.put("type", "longmsg");
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("id",dataid);
+        messageList.add(data);
+        typeData.put("data", data);
+        messageList.add(typeData);
+
+        params.put(ActionParams.MESSAGE, messageList);
+        params.put(ActionParams.AUTO_ESCAPE, autoEscape);
+        JSONObject result = actionHandler.action(session, ActionPathEnum.SEND_GROUP_MSG, params);
         return result != null ? result.to(new TypeReference<ActionData<MsgId>>() {
         }.getType()) : null;
     }
@@ -1026,6 +1122,22 @@ public class Bot {
         JSONObject result = actionHandler.action(session, ActionPathEnum.SEND_FORWARD_MSG, params);
         return result != null ? result.to(new TypeReference<ActionData<MsgId>>() {
         }.getType()) : null;
+    }
+
+
+    /**
+     *  获取MarkDownMsg消息ID
+     *  注：Lagrange需要先由客户端构建消息ID后，才能发送md消息
+     * @param event 事件
+     * @param msg   自定义转发消息 (可使用 ShiroUtils.generateMarkDownMsg() 方法创建)
+     *               参考文档</a>
+     * @return result {@link String}
+     */
+    public String getMarkDownMsgDataId(MessageEvent event, List<Map<String, Object>> msg) {
+        JSONObject params = new JSONObject();
+        params.put(ActionParams.MESSAGES, msg);
+
+        return actionHandler.action(session, ActionPathEnum.SEND_FORWARD_MSG, params).getString("data");
     }
 
     /**

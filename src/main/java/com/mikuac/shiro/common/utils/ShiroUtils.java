@@ -1,6 +1,7 @@
 package com.mikuac.shiro.common.utils;
 
 import com.alibaba.fastjson2.JSON;
+import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.MessageEvent;
 import com.mikuac.shiro.enums.MsgTypeEnum;
 import com.mikuac.shiro.model.ArrayMsg;
@@ -277,7 +278,7 @@ public class ShiroUtils {
             node.put("type", "node");
             Map<String, Object> data = new HashMap<>();
             data.put("name", name);
-            data.put("uin", uin);
+            data.put("uin", String.valueOf(uin));
             data.put("content", msg);
             node.put("data", data);
             nodes.add(node);
@@ -299,6 +300,29 @@ public class ShiroUtils {
             Map<String, Object> node = new HashMap<>();
             node.put("type", "node");
             Map<String, Object> data = new HashMap<>();
+            data.put("content", msg);
+            node.put("data", data);
+            nodes.add(node);
+        });
+        return nodes;
+    }
+
+    /**
+     * 创建自定义消息markdown笔记消息
+     *
+     * @param bot      机器人对象
+     * @param contents 消息列表，每个元素视为一个消息节点
+     *                 <a href="https://docs.go-cqhttp.org/cqcode/#%E5%90%88%E5%B9%B6%E8%BD%AC%E5%8F%91">参考文档</a>
+     * @return 消息结构
+     */
+    public static List<Map<String, Object>> generateMarkDownMsg(Bot bot, List<Object> contents) {
+        List<Map<String, Object>> nodes = new ArrayList<>();
+        contents.forEach(msg -> {
+            Map<String, Object> node = new HashMap<>();
+            node.put("type", "node");
+            Map<String, Object> data = new HashMap<>();
+            data.put("name", bot.getLoginInfo().getData().getNickname());
+            data.put("uin", String.valueOf(bot.getSelfId()));
             data.put("content", msg);
             node.put("data", data);
             nodes.add(node);

@@ -1,7 +1,7 @@
 @file:Suppress("SpellCheckingInspection")
 
 group = "com.mikuac"
-version = "2.2.0"
+version = "2.2.0-lagrange"
 
 plugins {
     signing
@@ -92,9 +92,9 @@ publishing {
     }
 }
 
-signing {
-    val signingKey = System.getenv("GPG_PRIVATE_KEY")
-    val signingPassword = System.getenv("GPG_PASSPHRASE")
-    useInMemoryPgpKeys(signingKey, signingPassword)
-    sign(publishing.publications["maven"])
-}
+//signing {
+//    val signingKey = System.getenv("GPG_PRIVATE_KEY")
+//    val signingPassword = System.getenv("GPG_PASSPHRASE")
+//    useInMemoryPgpKeys(signingKey, signingPassword)
+//    sign(publishing.publications["maven"])
+//}
